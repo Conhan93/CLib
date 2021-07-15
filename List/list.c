@@ -2,22 +2,7 @@
 #include <stdio.h>
 
 // instantiates a new list and initializes memory
-ListT* newList() {
-    ListT* newlist = malloc(sizeof(ListT));
-    
-    newlist->first = NULL;
-    newlist->last = NULL;
 
-    newlist->size = 0;
-
-    newlist->addFirst = &plistaddFirst;
-    newlist->addLast = &plistaddLast;
-    newlist->drop = &plistdrop;
-    newlist->find = &plistfind;
-    newlist->sort = &plistsort;
-
-    return newlist;
-}
 void destroyList(ListT** _list) {
 
     ListNodeT* node = (*_list)->first, *temp = NULL;
@@ -33,7 +18,7 @@ void destroyList(ListT** _list) {
     *_list = NULL;
 }
 
-int plistaddFirst(ListT* _list, const void* _element) {
+static int plistaddFirst(ListT* _list, const void* _element) {
 
     assert(_list);
     assert(_element);
@@ -56,7 +41,7 @@ int plistaddFirst(ListT* _list, const void* _element) {
     return 1;
 }
 
-int plistaddLast(ListT* _list, const void* _element) {
+static int plistaddLast(ListT* _list, const void* _element) {
     
     assert(_list);
     assert(_element);
@@ -81,7 +66,7 @@ int plistaddLast(ListT* _list, const void* _element) {
     return 1;
 }
 
-void* plistfind(ListT* _list, const void* _element) {
+static void* plistfind(ListT* _list, const void* _element) {
     int count = 0;
 
     for(
@@ -96,7 +81,7 @@ void* plistfind(ListT* _list, const void* _element) {
         }
     return NULL;
 }
-int plistdrop(ListT* _list, void* _element)  {
+static int plistdrop(ListT* _list, void* _element)  {
     if(_list->size)
         for(
             ListNodeT* cur = _list->first, *last = _list->last ;
@@ -123,13 +108,13 @@ int plistdrop(ListT* _list, void* _element)  {
             }
     return 0;
 }
-void plistdropLast(ListT* _list) {
-    pdrop(_list, _list->last->element);
+static void plistdropLast(ListT* _list) {
+    plistdrop(_list, _list->last->element);
 }
-void plistdropFirst(ListT* _list) {
-    pdrop(_list, _list->first->element);
+static void plistdropFirst(ListT* _list) {
+    plistdrop(_list, _list->first->element);
 }
-void plistsort(ListT* _list, int (*compare)(void*, void*)) {
+static void plistsort(ListT* _list, int (*compare)(void*, void*)) {
 
     if(!_list->size)
         return;
@@ -153,26 +138,26 @@ void plistsort(ListT* _list, int (*compare)(void*, void*)) {
         current = current->next;
     }
 }
+ListT* newList() {
+    ListT* newlist = malloc(sizeof(ListT));
+    
+    newlist->first = NULL;
+    newlist->last = NULL;
+
+    newlist->size = 0;
+
+    newlist->addFirst = &plistaddFirst;
+    newlist->addLast = &plistaddLast;
+    newlist->drop = &plistdrop;
+    newlist->find = &plistfind;
+    newlist->sort = &plistsort;
+
+    return newlist;
+}
 
 /////////////////// --- list iterator
 
-ListIterT* newListIterator(ListT* _list) {
-    ListIterT* iter = malloc(sizeof(ListIterT));
-
-    iter->first = _list->first;
-    iter->current = NULL;
-    iter->next = &plistiternext;
-    iter->prev = &plistiterprev;
-
-    return iter;
-}
-
-int destroyListIterator(ListIterT* _iter) {
-    free(_iter);
-    return (_iter = NULL) ? 0 : 1;
-}
-
-void* plistiternext(ListIterT* _iter) {
+static void* plistiternext(ListIterT* _iter) {
     assert(_iter);
 
     void* element = NULL;
@@ -191,7 +176,7 @@ void* plistiternext(ListIterT* _iter) {
     return element;
 }
 // TODO : fix else statement
-void* plistiterprev(ListIterT* _iter) {
+static void* plistiterprev(ListIterT* _iter) {
     assert(_iter);
 
     if(!_iter->current)
@@ -200,4 +185,29 @@ void* plistiterprev(ListIterT* _iter) {
         _iter->current = _iter->current->last;
 
     return _iter->current->element;
+}
+ListIterT* newListIterator(ListT* _list) {
+    puts("mallocing");
+    ListIterT* iter = malloc(sizeof(ListIterT));
+    puts("malloced iter");
+
+    iter->first = _list->first;
+    puts("first");
+    iter->current = NULL;
+    puts("current");
+    iter->next = &plistiternext;
+    puts("next");
+    iter->prev = &plistiterprev;
+    puts("prev");
+
+    return iter;
+}
+
+int destroyListIterator(ListIterT** _iter) {
+    (*_iter)->current = (*_iter)->first = NULL; 
+    (*_iter)->next = (*_iter)->prev = NULL;
+
+    free(*_iter);
+
+    return (*_iter = NULL) ? 0 : 1;
 }
