@@ -40,16 +40,5 @@ void destroyList(ListT** _list);
 
 ListIterT* newListIterator(ListT* _list);
 int destroyListIterator(ListIterT** _iter);
-/*
-void* plistiternext(ListIterT* _iter);
-void* plistiterprev(ListIterT* _iter);
 
-int plistaddFirst(ListT* _list, const void* _element);
-int plistaddLast(ListT* _list, const void* _element);
-void* plistfind(ListT* _list, const void* _element);
-int plistdrop(ListT* _list, void* _element);
-void plistdropLast(ListT* _list);
-void plistdropFirst(ListT* _list);
-void plistsort(ListT* _list, int (*compare)(void*, void*));
-*/
 #endif

@@ -3,6 +3,8 @@
 
 // instantiates a new list and initializes memory
 
+// instantiates a new list and initializes memory
+
 void destroyList(ListT** _list) {
 
     ListNodeT* node = (*_list)->first, *temp = NULL;
@@ -67,17 +69,10 @@ static int plistaddLast(ListT* _list, const void* _element) {
 }
 
 static void* plistfind(ListT* _list, const void* _element) {
-    int count = 0;
 
-    for(
-        ListNodeT* cur = _list->first ;
-        cur != NULL /*_list->last*/ && count < _list->size ;
-        cur = cur->next, count++
-        ) {
-            printf("looping, val : %s\n", (char*)cur->element);
+    for(ListNodeT* cur = _list->first ; cur != NULL; cur = cur->next) {
             if(cur->element == _element)
                 return (void*) cur->element;
-            count++;
         }
     return NULL;
 }
@@ -175,30 +170,31 @@ static void* plistiternext(ListIterT* _iter) {
 
     return element;
 }
-// TODO : fix else statement
 static void* plistiterprev(ListIterT* _iter) {
     assert(_iter);
 
-    if(!_iter->current)
+    void* element = NULL;
+
+    if(!_iter->current) {
         _iter->current = _iter->first;
-    else
+        element = _iter->current->element;
+    }
+        
+    else if(_iter->current->last) {
         _iter->current = _iter->current->last;
 
-    return _iter->current->element;
+        element = _iter->current->element;
+    }
+        
+    return element;
 }
 ListIterT* newListIterator(ListT* _list) {
-    puts("mallocing");
     ListIterT* iter = malloc(sizeof(ListIterT));
-    puts("malloced iter");
 
     iter->first = _list->first;
-    puts("first");
     iter->current = NULL;
-    puts("current");
     iter->next = &plistiternext;
-    puts("next");
     iter->prev = &plistiterprev;
-    puts("prev");
 
     return iter;
 }
