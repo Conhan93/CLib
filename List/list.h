@@ -17,11 +17,13 @@ typedef struct list_source {
     list_node_t* first;
     list_node_t* last;
 
-    int (*addFirst)(struct list_source*, const void*);
-    int (*addLast)(struct list_source*, const void*);
+    int (*push_front)(struct list_source*, const void*);
+    int (*push_back)(struct list_source*, const void*);
     void* (*find)(struct list_source*, const void*);
-    int (*drop)(struct list_source*, void*);
+    int (*remove)(struct list_source*, void*);
     void (*sort)(struct list_source* _list, int (*compare)(void*, void*));
+    void* (*pop_back)(struct list_source*);
+    void (*pop_front)(struct list_source);
 
 
 } list_t;

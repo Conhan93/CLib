@@ -20,7 +20,7 @@ void destroyList(list_t** _list) {
     *_list = NULL;
 }
 
-static int plistaddFirst(list_t* _list, const void* _element) {
+static int p_push_front(list_t* _list, const void* _element) {
 
     assert(_list);
     assert(_element);
@@ -43,7 +43,7 @@ static int plistaddFirst(list_t* _list, const void* _element) {
     return 1;
 }
 
-static int plistaddLast(list_t* _list, const void* _element) {
+static int p_push_back(list_t* _list, const void* _element) {
     
     assert(_list);
     assert(_element);
@@ -76,7 +76,7 @@ static void* plistfind(list_t* _list, const void* _element) {
         }
     return NULL;
 }
-static int plistdrop(list_t* _list, void* _element)  {
+static int p_remove(list_t* _list, void* _element)  {
     if(_list->size)
         for(
             list_node_t* cur = _list->first, *last = _list->last ;
@@ -103,13 +103,13 @@ static int plistdrop(list_t* _list, void* _element)  {
             }
     return 0;
 }
-static void plistdropLast(list_t* _list) {
+static void p_pop_back(list_t* _list) {
     plistdrop(_list, _list->last->element);
 }
-static void plistdropFirst(list_t* _list) {
+static void p_pop_front(list_t* _list) {
     plistdrop(_list, _list->first->element);
 }
-static void plistsort(list_t* _list, int (*compare)(void*, void*)) {
+static void p_sort(list_t* _list, int (*compare)(void*, void*)) {
 
     if(!_list->size)
         return;
@@ -141,11 +141,13 @@ list_t* newList() {
 
     newlist->size = 0;
 
-    newlist->addFirst = &plistaddFirst;
-    newlist->addLast = &plistaddLast;
-    newlist->drop = &plistdrop;
+    newlist->push_front = &p_push_front;
+    newlist->push_back = &p_push_back;
+    newlist->remove = &p_remove;
     newlist->find = &plistfind;
-    newlist->sort = &plistsort;
+    newlist->sort = &p_sort;
+    newlist->pop_back = &p_pop_back;
+    newlist->pop_front = &p_pop_front;
 
     return newlist;
 }
