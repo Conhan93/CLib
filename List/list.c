@@ -3,8 +3,6 @@
 
 // instantiates a new list and initializes memory
 
-// instantiates a new list and initializes memory
-
 void destroyList(list_t** _list) {
 
     list_node_t* node = (*_list)->first, *temp = NULL;
@@ -68,47 +66,90 @@ static int p_push_back(list_t* _list, const void* _element) {
     return 1;
 }
 
-static void* plistfind(list_t* _list, const void* _element) {
+static void* p_find(list_t* _list, const void* _element) {
+    int count = 0;
 
     for(list_node_t* cur = _list->first ; cur != NULL; cur = cur->next) {
+            printf("find : %d, elem %x\n", ++count, (cur->element));
             if(cur->element == _element)
-                return (void*) cur->element;
+                return cur->element;
         }
     return NULL;
 }
-static int p_remove(list_t* _list, void* _element)  {
+static void* p_pop_back(list_t* _list) {
+    if(!_list->size)
+        return NULL;
+
+    list_node_t* last = _list->last;
+    void* element = last->element;
+
+    _list->last = last->last;
+
+    last->element = NULL;
+    last->last = NULL;
+    last->next = NULL;
+
+    free(last);
+    last = NULL;
+
+    return element;
+}
+static void* p_pop_front(list_t* _list) {
+    if(!_list->size)
+        return NULL;
+
+    list_node_t* first = _list->first;
+    void* element = first->element;
+
+    _list->first = first->next;
+
+    first->element = NULL;
+    first->last = NULL;
+    first->next = NULL;
+
+    free(first);
+    first = NULL;
+
+    return element;
+}
+static void* p_remove(list_t* _list, void* _element)  {
+
+    void* element = NULL;
+
     if(_list->size)
-        for(
-            list_node_t* cur = _list->first, *last = _list->last ;
-            cur != _list->last ;
-            last = cur , cur = cur->next
-            ) {
-                if(cur->element == _element)  {
-                   --_list->size;
+        for(list_node_t* cur = _list->first; cur != NULL  ; cur = cur->next) {
+            if(cur->element == _element)  {
+                element = cur->element;
+               --_list->size;
 
-                    if(!_list->size) {
-                        free(cur);
-                        _list->first = NULL;
-                        _list->last = NULL;
-                        return 1;
-                    }
-
-                    last->next = cur->next;
-                    cur->next->last = last;
-                    
+                if(!_list->size) { // empty list
                     free(cur);
+                    _list->first = NULL;
+                    _list->last = NULL;
+                    return element;
+                } 
+                if(!cur->last) // remove first element
+                    return p_pop_front(_list);
+                if(!cur->next) // remove last element
+                    return p_pop_back(_list);
 
-                    return 1;
-                }
+                list_node_t* next = cur->next, *last = cur->last;
+                last->next = next;
+                next->last = last;
+
+                cur->element = NULL;
+                cur->last = NULL;
+                cur->next = NULL;
+
+                free(cur);
+                cur = NULL;
+
+                return element;
             }
-    return 0;
+        }
+    return element;
 }
-static void p_pop_back(list_t* _list) {
-    plistdrop(_list, _list->last->element);
-}
-static void p_pop_front(list_t* _list) {
-    plistdrop(_list, _list->first->element);
-}
+
 static void p_sort(list_t* _list, int (*compare)(void*, void*)) {
 
     if(!_list->size)
@@ -144,7 +185,7 @@ list_t* newList() {
     newlist->push_front = &p_push_front;
     newlist->push_back = &p_push_back;
     newlist->remove = &p_remove;
-    newlist->find = &plistfind;
+    newlist->find = &p_find;
     newlist->sort = &p_sort;
     newlist->pop_back = &p_pop_back;
     newlist->pop_front = &p_pop_front;
@@ -154,7 +195,7 @@ list_t* newList() {
 
 /////////////////// --- list iterator
 
-static void* plistiternext(list_iter_t* _iter) {
+static void* p_list_iter_next(list_iter_t* _iter) {
     assert(_iter);
 
     void* element = NULL;
@@ -172,7 +213,7 @@ static void* plistiternext(list_iter_t* _iter) {
 
     return element;
 }
-static void* plistiterprev(list_iter_t* _iter) {
+static void* p_list_iter_prev(list_iter_t* _iter) {
     assert(_iter);
 
     void* element = NULL;
@@ -195,8 +236,8 @@ list_iter_t* newListIterator(list_t* _list) {
 
     iter->first = _list->first;
     iter->current = NULL;
-    iter->next = &plistiternext;
-    iter->prev = &plistiterprev;
+    iter->next = &p_list_iter_next;
+    iter->prev = &p_list_iter_prev;
 
     return iter;
 }

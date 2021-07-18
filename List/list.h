@@ -20,10 +20,10 @@ typedef struct list_source {
     int (*push_front)(struct list_source*, const void*);
     int (*push_back)(struct list_source*, const void*);
     void* (*find)(struct list_source*, const void*);
-    int (*remove)(struct list_source*, void*);
+    void* (*remove)(struct list_source*, void*);
     void (*sort)(struct list_source* _list, int (*compare)(void*, void*));
-    void* (*pop_back)(struct list_source*);
-    void (*pop_front)(struct list_source);
+    void (*pop_back)(struct list_source*);
+    void (*pop_front)(struct list_source*);
 
 
 } list_t;
