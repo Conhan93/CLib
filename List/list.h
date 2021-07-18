@@ -5,40 +5,40 @@
 #include <stdlib.h>
 #include <assert.h>
 
-typedef struct listnode {
+typedef struct list_node {
     void* element;
-    struct listnode* last;
-    struct listnode* next;
-} ListNodeT;
+    struct list_node* last;
+    struct list_node* next;
+} list_node_t;
 
 
-typedef struct listT {
+typedef struct list_source {
     unsigned long size;
-    ListNodeT* first;
-    ListNodeT* last;
+    list_node_t* first;
+    list_node_t* last;
 
-    int (*addFirst)(struct listT*, const void*);
-    int (*addLast)(struct listT*, const void*);
-    void* (*find)(struct listT*, const void*);
-    int (*drop)(struct listT*, void*);
-    void (*sort)(struct listT* _list, int (*compare)(void*, void*));
+    int (*addFirst)(struct list_source*, const void*);
+    int (*addLast)(struct list_source*, const void*);
+    void* (*find)(struct list_source*, const void*);
+    int (*drop)(struct list_source*, void*);
+    void (*sort)(struct list_source* _list, int (*compare)(void*, void*));
 
 
-} ListT;
+} list_t;
 
 typedef struct list_iter {
-    ListNodeT* current;
-    ListNodeT* first;
+    list_node_t* current;
+    list_node_t* first;
 
     void* (*next)(struct list_iter*);
     void* (*prev)(struct list_iter*);
 
-} ListIterT;
+} list_iter_t;
 
-ListT* newList();
-void destroyList(ListT** _list);
+list_t* newList();
+void destroyList(list_t** _list);
 
-ListIterT* newListIterator(ListT* _list);
-int destroyListIterator(ListIterT** _iter);
+list_iter_t* newListIterator(list_t* _list);
+int destroyListIterator(list_iter_t** _iter);
 
 #endif
