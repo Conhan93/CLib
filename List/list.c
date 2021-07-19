@@ -1,7 +1,7 @@
 #include "list.h"
 #include <stdio.h>
 
-// instantiates a new list and initializes memory
+
 
 void destroyList(list_t** _list) {
 
@@ -11,8 +11,10 @@ void destroyList(list_t** _list) {
         temp = node;
         node = node->next;
         free(temp);
+        temp = NULL;
     }
     free(node);
+    node = NULL;
     free(*_list);
 
     *_list = NULL;
@@ -25,15 +27,18 @@ static int p_push_front(list_t* _list, const void* _element) {
 
     list_node_t* new = malloc(sizeof(list_node_t));
     assert(new);
-
+    new->element = _element;
     
     if(!_list->size) {
-        _list->last = new;
+        _list->first = _list->last = new;
+        _list->size++;
+        return 1;
     }
 
-    new->element = _element;
+    
     new->last = NULL;
     new->next = _list->first;
+    _list->first->last = new;
     _list->first = new;
 
     _list->size++;
@@ -53,12 +58,14 @@ static int p_push_back(list_t* _list, const void* _element) {
 
     if(!_list->size) {
         _list->first = _list->last = new;
+        _list->size++;
+        return 1;
         
     } else {
-        _list->last->next = new;
+        new->next = NULL;
         new->last = _list->last;
+        _list->last->next = new;
         _list->last = new;
-        _list->last->next = NULL;
     }
     
     _list->size++;
@@ -67,10 +74,8 @@ static int p_push_back(list_t* _list, const void* _element) {
 }
 
 static void* p_find(list_t* _list, const void* _element) {
-    int count = 0;
 
     for(list_node_t* cur = _list->first ; cur != NULL; cur = cur->next) {
-            printf("find : %d, elem %x\n", ++count, (cur->element));
             if(cur->element == _element)
                 return cur->element;
         }
@@ -84,6 +89,7 @@ static void* p_pop_back(list_t* _list) {
     void* element = last->element;
 
     _list->last = last->last;
+    _list->last->next = NULL;
 
     last->element = NULL;
     last->last = NULL;
@@ -102,6 +108,7 @@ static void* p_pop_front(list_t* _list) {
     void* element = first->element;
 
     _list->first = first->next;
+    _list->first->last = NULL;
 
     first->element = NULL;
     first->last = NULL;
@@ -174,7 +181,23 @@ static void p_sort(list_t* _list, int (*compare)(void*, void*)) {
         current = current->next;
     }
 }
-list_t* newList() {
+static void p_reverse(list_t* _list) {
+    if(!_list->size)
+        return;
+    list_node_t* first = _list->first, *last = _list->last;
+    void* temp = NULL;
+    while(first != last) {
+        temp = first->element;
+        first->element = last->element;
+        last->element = temp;
+
+        assert(first->next); assert(last->last);
+        first = first->next;
+        if(first == last) break;
+        last = last->last;
+    }
+}
+list_t* newList() { // instantiates a new list and initializes memory
     list_t* newlist = malloc(sizeof(list_t));
     
     newlist->first = NULL;
@@ -187,6 +210,7 @@ list_t* newList() {
     newlist->remove = &p_remove;
     newlist->find = &p_find;
     newlist->sort = &p_sort;
+    newlist->reverse = &p_reverse;
     newlist->pop_back = &p_pop_back;
     newlist->pop_front = &p_pop_front;
 
@@ -202,7 +226,6 @@ static void* p_list_iter_next(list_iter_t* _iter) {
 
     if(!_iter->current) {
         _iter->current = _iter->first;
-
         element = _iter->current->element;
 
     } else if(_iter->current->next){

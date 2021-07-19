@@ -22,8 +22,9 @@ typedef struct list_source {
     void* (*find)(struct list_source*, const void*);
     void* (*remove)(struct list_source*, void*);
     void (*sort)(struct list_source* _list, int (*compare)(void*, void*));
-    void (*pop_back)(struct list_source*);
-    void (*pop_front)(struct list_source*);
+    void (*reverse)(struct list_source* _list);
+    void* (*pop_back)(struct list_source*);
+    void* (*pop_front)(struct list_source*);
 
 
 } list_t;
