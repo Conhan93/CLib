@@ -25,8 +25,10 @@ static int p_push_front(list_t* _list, const void* _element) {
     assert(_list);
     assert(_element);
 
-    list_node_t* new = malloc(sizeof(list_node_t));
-    assert(new);
+    list_node_t* new;
+    if(!(new = malloc(sizeof(list_node_t))))
+        return 0;
+
     new->element = _element;
     
     if(!_list->size) {
@@ -51,8 +53,9 @@ static int p_push_back(list_t* _list, const void* _element) {
     assert(_list);
     assert(_element);
 
-    list_node_t* new = malloc(sizeof(list_node_t));
-    assert(new);
+    list_node_t* new;
+    if(!(new = malloc(sizeof(list_node_t))))
+        return 0;
 
     new->element = _element;
 
@@ -198,7 +201,10 @@ static void p_reverse(list_t* _list) {
     }
 }
 list_t* newList() { // instantiates a new list and initializes memory
-    list_t* newlist = malloc(sizeof(list_t));
+    list_t* newlist;
+
+    if(!(newlist = malloc(sizeof(list_t))))
+        return NULL;
     
     newlist->first = NULL;
     newlist->last = NULL;
@@ -255,7 +261,9 @@ static void* p_list_iter_prev(list_iter_t* _iter) {
     return element;
 }
 list_iter_t* newListIterator(list_t* _list) {
-    list_iter_t* iter = malloc(sizeof(list_iter_t));
+    list_iter_t* iter;
+    if(!(iter = malloc(sizeof(list_iter_t))))
+        return NULL;
 
     iter->first = _list->first;
     iter->current = NULL;
