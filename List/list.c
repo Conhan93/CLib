@@ -11,10 +11,8 @@ void destroyList(list_t** _list) {
         temp = node;
         node = node->next;
         free(temp);
-        temp = NULL;
     }
     free(node);
-    node = NULL;
     free(*_list);
 
     *_list = NULL;
@@ -94,10 +92,6 @@ static void* p_pop_back(list_t* _list) {
     _list->last = last->last;
     _list->last->next = NULL;
 
-    last->element = NULL;
-    last->last = NULL;
-    last->next = NULL;
-
     free(last);
     last = NULL;
 
@@ -112,10 +106,6 @@ static void* p_pop_front(list_t* _list) {
 
     _list->first = first->next;
     _list->first->last = NULL;
-
-    first->element = NULL;
-    first->last = NULL;
-    first->next = NULL;
 
     free(first);
     first = NULL;
@@ -146,10 +136,6 @@ static void* p_remove(list_t* _list, void* _element)  {
                 list_node_t* next = cur->next, *last = cur->last;
                 last->next = next;
                 next->last = last;
-
-                cur->element = NULL;
-                cur->last = NULL;
-                cur->next = NULL;
 
                 free(cur);
                 cur = NULL;
@@ -194,7 +180,6 @@ static void p_reverse(list_t* _list) {
         first->element = last->element;
         last->element = temp;
 
-        assert(first->next); assert(last->last);
         first = first->next;
         if(first == last) break;
         last = last->last;
@@ -274,8 +259,6 @@ list_iter_t* newListIterator(list_t* _list) {
 }
 
 int destroyListIterator(list_iter_t** _iter) {
-    (*_iter)->current = (*_iter)->first = NULL; 
-    (*_iter)->next = (*_iter)->prev = NULL;
 
     free(*_iter);
 
