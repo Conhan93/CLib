@@ -6,58 +6,14 @@
 static const unsigned char base64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-
-static int hexchar_to_value(char character) {
-    if(character >= '0' && character <= '9')
-        return (character - '0');
-    else if (character >= 'A' && character <= 'F') 
-        return (10 + (character - 'A'));
-    else if (character >= 'a' && character <= 'f')
-        return (10 + (character - 'a'));
-    else
-        return -1;
-}
-
-static unsigned char* base64_hexstring_to_byte_array(char* string) {
-
-    char* hexstring = string;
-
-    if(!hexstring) return NULL;
-
-    size_t len = strlen(hexstring);
-    unsigned char pad = len % 2;
-    if(pad) { // if uneven
-        hexstring = malloc(strlen(string) + 1);
-        if(!hexstring) return NULL;
-    
-        sprintf(hexstring, "0%s", string);
-        len = strlen(hexstring);
-    }
-    
-    unsigned char* array = calloc(len /2  , sizeof(unsigned char));
-    if(array == NULL) {
-        if(pad) free(hexstring);
-        return NULL;
-    }
-
-    unsigned long index = 0;
-    while(index < len) {
-        char character = hexstring[index];
-        int val = 0;
- 
-        if((val = hexchar_to_value(character)) < 0) {
-            if(pad) free(hexstring);
-            free(array);
-            return NULL;
-        }
-       
-        // index/2 rounds down, advances index everyother byte
-        array[(index/2)] += val << (((index + 1) % 2) * 4);
-        index++;
-    }
-    if(pad) free(hexstring);
-    return array;
-}
+static const unsigned char base64_decode_table[] =
+    { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 62, 63, 62, 62, 63, 52, 53, 54, 55,
+56, 57, 58, 59, 60, 61,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,
+7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,  0,
+0,  0,  0, 63,  0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 };
 
 char* base64_encoder(unsigned char* bytes, size_t size) {
     const unsigned char *endpos = bytes + size;
@@ -71,15 +27,7 @@ char* base64_encoder(unsigned char* bytes, size_t size) {
     unsigned char* index = output;
 
     while(endpos - input >= 3) {
-        
-        /*
-        #define GET_FIRST_SEXTET(index, table, input) ((*index++ = table[(*input & 0b11111100) >> 2]))
-        #define GET_SECOND_SEXTET(index, table, input) (*index++ = table[(*input & 0b00000011) << 4 | (*(input+1) & 0b11110000) >> 4])
-        #define GET_THIRD_SEXTET(index, table, input) (*index++ = table[(*(input+1) & 0b00001111) << 2 | (*(input+2) & 0b11000000) >> 6 ])
-        #define GET_FOURTH_SEXTET(index, table, input) (*index++ = table[*(input+2) & 0b00111111 ])
-        */
 
-       
         *index++ = base64_table[(*input & 0b11111100) >> 2];
         *index++ = base64_table[(*input & 0b00000011) << 4 | (*(input+1) & 0b11110000) >> 4];
         *index++ = base64_table[(*(input+1) & 0b00001111) << 2 | (*(input+2) & 0b11000000) >> 6 ];
@@ -106,15 +54,53 @@ char* base64_encoder(unsigned char* bytes, size_t size) {
 
 
 }
-/**
- *  Converts a hex encoded string into base64
- *  @string: hex-encoded string to convert
- *  @return base64 encoded string : memory allocated,
- *  caller responsible for freeing memory!!!
- */
-char* base64_encode_from_hex_string(char* string) {
-    int len = strlen(string);
-    unsigned char* byte_array = NULL;
+unsigned char* base64_decoder(char* base_64, size_t* len_out) {
+    
+    size_t len = strlen(base_64);
+    if(len % 4) return NULL;
 
-    return (byte_array = base64_hexstring_to_byte_array(string)) ? base64_encoder(byte_array, len/2) : NULL;
+    unsigned char* in = (unsigned char*)base_64;
+    unsigned char* endpos = in + len;
+
+    size_t size = (len / 4)*3;
+
+    if(*(in+2) == '=') size--;
+    if(*(in+3) == '=') size--;
+
+    unsigned char* bytes = malloc(size);
+    if(!bytes) return NULL;
+    unsigned char* bytes_pos = bytes;
+
+    while(endpos - in >= 4) {
+            if(*(in+2) == '=' || *(in+3) == '=') break;
+
+            unsigned char sextet_1 = base64_decode_table[*in];
+            unsigned char sextet_2 = base64_decode_table[*(in+1)];
+            unsigned char sextet_3 = base64_decode_table[*(in+2)];
+            unsigned char sextet_4 = base64_decode_table[*(in+3)];
+
+            *bytes_pos++ = ((sextet_1 << 2) | ((sextet_2 & 0b110000) >> 4));
+            *bytes_pos++ = (((sextet_2 & 0b1111) << 4) | ((sextet_3 & 0b111100) >> 2 )) ;
+            *bytes_pos++ = (((sextet_3 & 0b11) << 6) | (sextet_4 & 0b111111));
+
+            in += 4;
+    }
+
+    if(*(in+2) == '=' && *(in+3) == '=') {
+        unsigned char sextet_1 = base64_decode_table[*in];
+        unsigned char sextet_2 = base64_decode_table[*(in+1)];
+
+        *bytes_pos++ = ((sextet_1 << 2) | (sextet_2 & 0b00110000) >> 4);
+    } else if(*(in+3) == '=') {
+        unsigned char sextet_1 = base64_decode_table[*in];
+        unsigned char sextet_2 = base64_decode_table[*(in+1)];
+        unsigned char sextet_3 = base64_decode_table[*(in+2)];
+
+        *bytes_pos++ = ((sextet_1 << 2) | ((sextet_2 & 0b110000) >> 4));
+        *bytes_pos++ = (((sextet_2 & 0b1111) << 4) | ((sextet_3 & 0b111100) >> 2 )) ;
+    }
+
+    *len_out = size;
+    
+    return bytes;
 }
