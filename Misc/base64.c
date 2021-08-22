@@ -15,6 +15,15 @@ static const unsigned char base64_decode_table[] =
 0,  0,  0, 63,  0, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51 };
 
+
+
+/**
+ *  Takes a byte array and encodes them as base-64 encoded string
+ * @bytes: the byte array
+ * @size: the size or length of the array
+ * @return: base-64 encoded string - string is malloced
+ * caller responsible for freeing memory!!
+ */
 char* base64_encoder(unsigned char* bytes, size_t size) {
     const unsigned char *endpos = bytes + size;
     const unsigned char * input = bytes;
@@ -54,6 +63,13 @@ char* base64_encoder(unsigned char* bytes, size_t size) {
 
 
 }
+/**
+ * Decodes a base-64 encoded string into a byte array
+ * @base_64: base-64 encoded string
+ * @len_out: the size of the returned byte array
+ * @return the decoded string as malloced unsigned pointer
+ *  - array is malloced caller responsible for freeing memory! 
+ */
 unsigned char* base64_decoder(char* base_64, size_t* len_out) {
     
     size_t len = strlen(base_64);
