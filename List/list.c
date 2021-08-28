@@ -20,8 +20,7 @@ void destroyList(list_t** _list) {
 
 static int p_push_front(list_t* _list, const void* _element) {
 
-    assert(_list);
-    assert(_element);
+    if(!_list | !_element) return 0;
 
     list_node_t* new;
     if(!(new = malloc(sizeof(list_node_t))))
@@ -48,8 +47,7 @@ static int p_push_front(list_t* _list, const void* _element) {
 
 static int p_push_back(list_t* _list, const void* _element) {
     
-    assert(_list);
-    assert(_element);
+    if(!_list | !_element) return 0;
 
     list_node_t* new;
     if(!(new = malloc(sizeof(list_node_t))))
@@ -211,7 +209,7 @@ list_t* newList() { // instantiates a new list and initializes memory
 /////////////////// --- list iterator
 
 static void* p_list_iter_next(list_iter_t* _iter) {
-    assert(_iter);
+    if(!_iter) return NULL;
 
     void* element = NULL;
 
@@ -228,7 +226,7 @@ static void* p_list_iter_next(list_iter_t* _iter) {
     return element;
 }
 static void* p_list_iter_prev(list_iter_t* _iter) {
-    assert(_iter);
+    if(!_iter) return NULL;
 
     void* element = NULL;
 
