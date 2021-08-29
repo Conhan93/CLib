@@ -135,6 +135,7 @@ int crypto_encrypt_hex_repeating_xor(char* text,char* key, char* out, size_t out
     return 1;
 
 }
+//TODO : give it a proper name
 static int crypto_string_mostly_not_letters(char* string, float noise_ratio) {
     size_t len = strlen(string);
 
@@ -166,9 +167,9 @@ static int crypto_score_common_words(char* string) {
         if(strstr(string, common_words[index]))
             points++;
 
-    //printf("points : %d\n", points);
     return points;
 }
+// WIP
 static int crypto_letter_frequency_english(char* string) {
     size_t len = strlen(string);
 
@@ -182,13 +183,11 @@ static int crypto_letter_frequency_english(char* string) {
     while(endpos - input) 
         count[*input++]++;
     
-    puts("\n");
+
     for(int index = 0 ; index < 256 ; index++)
         if(count[index])
         {
-            frequencies[index] = (float)count[index]/len;
-            printf("%d,%.2f %c ", count[index],frequencies[index], index);
-            
+            frequencies[index] = (float)count[index]/len;        
         }
     int points = 0;
     for(int index = 0 ; index + 1 < 19 ; index++) {
@@ -201,8 +200,6 @@ static int crypto_letter_frequency_english(char* string) {
         
     }
 
-    puts("\n");
-    printf("points : %d\n", points);
     return points;
 
 } 
