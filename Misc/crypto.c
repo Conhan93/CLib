@@ -2,15 +2,18 @@
 #include "base64.h"
 #include <string.h>
 #include <stdlib.h>
-
+#include <float.h>
 #include <ctype.h>
 
 #include <stdio.h>
+
+#define BYTE_SIZE 8
 
 
 static int crypto_letter_frequency_english(char* string);
 static int crypto_string_mostly_not_letters(char* string, float noise_ratio);
 static int crypto_score_common_words(char* string);
+static int get_hamming_distance(char* first_text, size_t len1, char* second_text, size_t len2);
 
 /**
  *  Performs XOR on two hex strings and outputs the result string in hex
@@ -135,6 +138,35 @@ int crypto_encrypt_hex_repeating_xor(char* text,char* key, char* out, size_t out
     return 1;
 
 }
+// WIP
+/**
+ *  from cryptopals challenge set 1 - challenge nr 6
+ * 
+ *     create a function to get the hamming distance between two strings. - check
+ * 
+ *     write a function to get a sample of keysizes with the lowest normalized
+ *     hamming distance from a range of keysize blocks of cyphertext.
+ * 
+ *     transpose cypher into blocks of keysizes and decrypt as if it was a
+ *     single byte xor encryption.
+ * 
+ *     
+ *     
+ */
+int crypto_decrypt_repeating_xor(char* in, char* out, size_t outlen) {
+
+    float lowest_ham_dist_normalized = FLT_MAX, ham_dist_result_normalized = 0.0F;
+
+    for(int key_size = 1 ; key_size < 40 ; key_size++) {
+        unsigned char* cypherblock = in;
+        ham_dist_result_normalized = 
+            get_hamming_distance(cypherblock, key_size, cypherblock + key_size, key_size);
+        if(ham_dist_result_normalized < lowest_ham_dist_normalized) {
+            lowest_ham_dist_normalized = ham_dist_result_normalized;
+        }
+    }
+    return 1;
+}
 //TODO : give it a proper name
 static int crypto_string_mostly_not_letters(char* string, float noise_ratio) {
     size_t len = strlen(string);
@@ -203,3 +235,30 @@ static int crypto_letter_frequency_english(char* string) {
     return points;
 
 } 
+static int get_hamming_distance(char* first_text, size_t len1, char* second_text, size_t len2) {
+    unsigned char* first = first_text;
+    unsigned char* first_end = first + len1;
+
+    unsigned char* second = second_text;
+    unsigned char* second_end = second + len2;
+
+    int hamming_distance = 0;
+
+    while((first_end - first) && (second_end - second)) {
+        for(unsigned bit = 0 ; bit < BYTE_SIZE ; bit++) {
+            unsigned first_bit = (*first & (1UL << bit) );
+            unsigned second_bit = (*second & (1UL << bit) );
+
+            if(first_bit ^ second_bit)
+                hamming_distance++;
+        }
+        
+        first++; second++;
+    }
+
+    hamming_distance += (first_end - first) ? (first_end - first) * 8 :
+        (second_end - second) ? (second_end - second) * 8 : 0;
+
+
+    return hamming_distance;
+}
