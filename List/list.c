@@ -18,7 +18,7 @@ void destroyList(list_t** _list) {
     *_list = NULL;
 }
 
-static int p_push_front(list_t* _list, const void* _element) {
+static int push_front(list_t* _list, const void* _element) {
 
     if(!_list | !_element) return 0;
 
@@ -45,7 +45,7 @@ static int p_push_front(list_t* _list, const void* _element) {
     return 1;
 }
 
-static int p_push_back(list_t* _list, const void* _element) {
+static int push_back(list_t* _list, const void* _element) {
     
     if(!_list | !_element) return 0;
 
@@ -72,7 +72,7 @@ static int p_push_back(list_t* _list, const void* _element) {
     return 1;
 }
 
-static void* p_find(list_t* _list, const void* _element) {
+static void* find(list_t* _list, const void* _element) {
 
     for(list_node_t* cur = _list->first ; cur != NULL; cur = cur->next) {
             if(cur->element == _element)
@@ -80,7 +80,7 @@ static void* p_find(list_t* _list, const void* _element) {
         }
     return NULL;
 }
-static void* p_pop_back(list_t* _list) {
+static void* pop_back(list_t* _list) {
     if(!_list->size)
         return NULL;
 
@@ -95,7 +95,7 @@ static void* p_pop_back(list_t* _list) {
 
     return element;
 }
-static void* p_pop_front(list_t* _list) {
+static void* pop_front(list_t* _list) {
     if(!_list->size)
         return NULL;
 
@@ -110,7 +110,7 @@ static void* p_pop_front(list_t* _list) {
 
     return element;
 }
-static void* p_remove(list_t* _list, void* _element)  {
+static void* remove(list_t* _list, void* _element)  {
 
     void* element = NULL;
 
@@ -144,7 +144,7 @@ static void* p_remove(list_t* _list, void* _element)  {
     return element;
 }
 
-static void p_sort(list_t* _list, int (*compare)(void*, void*)) {
+static void sort(list_t* _list, int (*compare)(void*, void*)) {
 
     if(!_list->size)
         return;
@@ -168,7 +168,7 @@ static void p_sort(list_t* _list, int (*compare)(void*, void*)) {
         current = current->next;
     }
 }
-static void p_reverse(list_t* _list) {
+static void reverse(list_t* _list) {
     if(!_list->size)
         return;
     list_node_t* first = _list->first, *last = _list->last;
@@ -194,21 +194,21 @@ list_t* newList() { // instantiates a new list and initializes memory
 
     newlist->size = 0;
 
-    newlist->push_front = &p_push_front;
-    newlist->push_back = &p_push_back;
-    newlist->remove = &p_remove;
-    newlist->find = &p_find;
-    newlist->sort = &p_sort;
-    newlist->reverse = &p_reverse;
-    newlist->pop_back = &p_pop_back;
-    newlist->pop_front = &p_pop_front;
+    newlist->push_front = &push_front;
+    newlist->push_back = &push_back;
+    newlist->remove = &remove;
+    newlist->find = &find;
+    newlist->sort = &sort;
+    newlist->reverse = &reverse;
+    newlist->pop_back = &pop_back;
+    newlist->pop_front = &pop_front;
 
     return newlist;
 }
 
 /////////////////// --- list iterator
 
-static void* p_list_iter_next(list_iter_t* _iter) {
+static void* iter_next(list_iter_t* _iter) {
     if(!_iter) return NULL;
 
     void* element = NULL;
@@ -225,7 +225,7 @@ static void* p_list_iter_next(list_iter_t* _iter) {
 
     return element;
 }
-static void* p_list_iter_prev(list_iter_t* _iter) {
+static void* iter_prev(list_iter_t* _iter) {
     if(!_iter) return NULL;
 
     void* element = NULL;
@@ -250,8 +250,8 @@ list_iter_t* newListIterator(list_t* _list) {
 
     iter->first = _list->first;
     iter->current = NULL;
-    iter->next = &p_list_iter_next;
-    iter->prev = &p_list_iter_prev;
+    iter->next = &iter_next;
+    iter->prev = &iter_prev;
 
     return iter;
 }
