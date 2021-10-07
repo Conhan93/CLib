@@ -3,6 +3,7 @@
 
 
 ///////// MAP
+
 map_t* new_map() {
     map_t* _map = malloc(sizeof(map_t));
     if(!_map) return NULL;
@@ -14,6 +15,50 @@ map_t* new_map() {
 
 void destroy_map(map_t* _map) {
 
+}
+
+int map_add(map_t* _map, void* key, size_t k_size, void* value, size_t v_size) {
+
+    map_node_t* _node = new_node(key, k_size, value, v_size);
+    if(!_node) return 0;
+
+    map_node_t* p = _map->head;
+
+    while(p = p->next) ;
+
+    p->next = _node;
+    _node->prev = p;
+
+    return 1;
+}
+
+void map_remove(map_t* _map, void* key, size_t k_size) {
+
+    map_node_t* _node = _map->head;
+    while(_node->next) {
+        if(compare_key(_node, key, k_size))
+            break;
+    }
+
+    if(_node) {
+        // remove node from map
+    }
+}
+
+
+static int compare_key(map_node_t* _node, void* key, size_t k_size) {
+
+    if(_node->key_size != k_size) return 0;
+
+    unsigned char* node_key = _node->key;
+    unsigned char* cmp_key = key;
+    const unsigned char* end_pos = node_key + k_size;
+
+    while(node_key != end_pos)
+        if(*node_key++ != *cmp_key++)
+            return 0;
+    
+    return 1;
 }
 
 
@@ -34,9 +79,12 @@ static map_node_t* new_node(void* key, size_t key_size, void* value, size_t valu
     if(!new_node->value) return NULL;
     new_node->value_size = value_size;
 
+    new_node->next = NULL;
+    new_node->prev = NULL;
+
     return new_node;
 } 
 
 static void destroy_node() {
-    
+
 }
