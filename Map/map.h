@@ -4,6 +4,9 @@
 
 
 typedef struct {
+    void* next;
+    void* prev;
+
     void* key;
     void* value;
 
